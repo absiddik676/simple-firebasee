@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup } from "firebase/auth";
+import { GithubAuthProvider, GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import app from '../firebase/firebase.init';
 
 
@@ -7,10 +7,11 @@ import app from '../firebase/firebase.init';
 const Login = () => {
     const [user,setUser] = useState(null)
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    console.log(user);
+    const googleProvider = new GoogleAuthProvider();
+    const githubProvider = new GithubAuthProvider()
+
     const handelGoogleSignIn = () =>{
-        signInWithPopup(auth,provider)
+        signInWithPopup(auth,googleProvider)
         .then(result =>{
             const loggedInUser = result.user;
             setUser(loggedInUser)
@@ -19,9 +20,41 @@ const Login = () => {
             console.log(error.message);
         })
     }
+
+    const handelGithubSignIn =  ()=>{
+        signInWithPopup(auth, githubProvider)
+        .then(result=>{
+            const githubLoggedInUser = result.user;
+            setUser(githubLoggedInUser)
+
+        })
+        .catch(error=>{
+            console.log(error);
+        })
+    }
+
+    const handelSignOut = ()=>{
+        signOut(auth)
+        .then(result =>{
+            console.log(result);
+            setUser(null)
+        })
+        .catch(error=>{
+            console.log(error);
+        })
+    }
     return (
         <div>
-            <button onClick={handelGoogleSignIn}>Google Login</button>
+            {
+                user ?
+                <button onClick={handelSignOut}>Sign out</button>:
+               <div>
+                 <button onClick={handelGoogleSignIn}>Google Login</button>
+                 <button onClick={handelGithubSignIn}>Github Login</button>
+               </div>
+
+            }
+            
             {user && <div>
                 <h3>{user.displayName}</h3>
                 <h3>{user.email}</h3>
